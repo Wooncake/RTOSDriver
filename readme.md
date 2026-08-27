@@ -1,3 +1,35 @@
+# LED驱动说明
+
+#### **Driver层** （只负责逻辑描述，功能的实现）
+
+**Led_Init(led_handle_t *handle, led_io_t *io, uint8_t active_level)** （连接HAL或其他的桥梁）
+
+**drv_status_t LED_Set(led_handle_t *handle, bool on);**
+
+**drv_status_t LED_On(led_handle_t *handle);**
+
+**drv_status_t LED_Off(led_handle_t *handle);**
+
+**drv_status_t LED_Toggle(led_handle_t *handle);**
+
+**bool LED_IsOn(const led_handle_t *handle);**
+
+五个功能函数，只需调用LED句柄即可使用
+
+
+
+### BSP层
+
+只做实际IO口的初始化，连接具体的设备
+
+
+
+### APP层
+
+只负责实际功能的运行
+
+
+
 ## 每次写一个外设前，先回答下面几个问题
 
 **这个模块提供什么功能？**

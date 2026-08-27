@@ -44,7 +44,6 @@ drv_status_t Led_DeInit(led_handle_t *handle);
 drv_status_t LED_Set(led_handle_t *handle, bool on);
 drv_status_t LED_On(led_handle_t *handle);
 drv_status_t LED_Off(led_handle_t *handle);
-
 drv_status_t LED_Toggle(led_handle_t *handle);
 bool LED_IsOn(const led_handle_t *handle);
 

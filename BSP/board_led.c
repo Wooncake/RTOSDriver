@@ -12,11 +12,7 @@ static void Board_LED_WriteLevel(void *context, uint8_t level)
 {
     gpio_t *gpio = (gpio_t *)context;
 
-    HAL_GPIO_WritePin(
-        gpio->port,
-        gpio->pin,
-        level ? GPIO_PIN_SET : GPIO_PIN_RESET
-    );
+    HAL_GPIO_WritePin(gpio->port, gpio->pin, level ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 //注册IO操作接口
