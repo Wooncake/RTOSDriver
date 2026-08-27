@@ -1,7 +1,9 @@
 # dot files
 /.vscode/launch.json
 /.settings
+/.RTE_Components.h
 /.eide/log
+/.mxproject
 /.eide.usr.ctx.json
 /.cmsis
 /.pack
@@ -15,6 +17,8 @@
 /Drivers
 /Middlewares
 /MDK-ARM
+
 # eide template
 *.ept
 *.eide-template
+*.ioc
