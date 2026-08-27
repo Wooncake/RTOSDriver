@@ -1,0 +1,20 @@
+# dot files
+/.vscode/launch.json
+/.settings
+/.eide/log
+/.eide.usr.ctx.json
+/.cmsis
+/.pack
+/.eide
+# project out
+/build
+/bin
+/obj
+/out
+/core
+/Drivers
+/Middlewares
+/MDK-ARM
+# eide template
+*.ept
+*.eide-template
