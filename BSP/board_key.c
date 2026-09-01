@@ -15,8 +15,7 @@ static uint8_t Button_ReadLevel(void *context)
 
     gpio = (gpio_input_t *)context;
 
-    return (uint8_t)HAL_GPIO_ReadPin(gpio->port,
-                                     gpio->pin);
+    return (uint8_t)HAL_GPIO_ReadPin(gpio->port, gpio->pin);
 }
 
 static gpio_input_t key1_gpio =

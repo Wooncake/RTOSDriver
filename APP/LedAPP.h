@@ -3,7 +3,7 @@
 
 #include "LEDDriver.h"
 #include "KeyDriver.h"
-
+#include "BuzzerDriver.h"
 
 
 void App_Test(void);
