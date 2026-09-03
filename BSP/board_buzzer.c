@@ -29,8 +29,7 @@ static buzzer_bsp_t buzzer_bsp =
 
 static void Buzzer_WriteLevel(uint8_t level)
 {
-    HAL_GPIO_WritePin(buzzer_bsp.gpio.port, buzzer_bsp.gpio.pin,
-                      level != 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(buzzer_bsp.gpio.port, buzzer_bsp.gpio.pin, level != 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 static void Buzzer_SetLevel(void *context, uint8_t level)
@@ -39,11 +38,17 @@ static void Buzzer_SetLevel(void *context, uint8_t level)
 
     if (buzzer != 0)
     {
-        HAL_GPIO_WritePin(buzzer->gpio.port, buzzer->gpio.pin,
-                          level != 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(buzzer->gpio.port, buzzer->gpio.pin, level != 0U ? GPIO_PIN_SET : GPIO_PIN_RESET);
     }
 }
 
+/*
+* @brief  启动蜂鸣器发声
+* @param  context: 蜂鸣器上下文
+* @param  frequency_hz: 发声频率，单位 Hz
+* @param  duty_percent: 占空比，范围 1~99
+* @retval buzzer_status_t
+*/
 
 static buzzer_status_t Buzzer_StartTone(void *context, uint32_t frequency_hz, uint8_t duty_percent)
 {
@@ -52,9 +57,7 @@ static buzzer_status_t Buzzer_StartTone(void *context, uint32_t frequency_hz, ui
     uint32_t high_ticks;
     uint32_t low_ticks;
 
-    if (buzzer == 0 || frequency_hz == 0U ||
-        duty_percent == 0U || duty_percent >= 100U ||
-        buzzer->timer_tick_hz < frequency_hz)
+    if (buzzer == 0 || frequency_hz == 0U || duty_percent == 0U || duty_percent >= 100U || buzzer->timer_tick_hz < frequency_hz)
     {
         return BUZZER_INVALID_PARAM;
     }
@@ -95,6 +98,11 @@ static buzzer_status_t Buzzer_StartTone(void *context, uint32_t frequency_hz, ui
     return BUZZER_OK;
 }
 
+/*
+ * @brief  停止蜂鸣器发声
+ * @param  context: 蜂鸣器上下文
+ * @retval None
+ */
 static void Buzzer_StopTone(void *context)
 {
     buzzer_bsp_t *buzzer = (buzzer_bsp_t *)context;
@@ -110,14 +118,18 @@ static void Buzzer_StopTone(void *context)
 
 buzzer_handle_t g_buzzer;
 
+/*
+* @brief  蜂鸣器初始化
+* @param  None
+*/
 void BSP_Buzzer_Init(void)
 {
     buzzer_config_t config;
 
     config.type = BSP_BUZZER_TYPE;
-    config.io.set_level = Buzzer_SetLevel;
-    config.io.start_tone = Buzzer_StartTone;
-    config.io.stop_tone = Buzzer_StopTone;
+    config.io.set_level = Buzzer_SetLevel;   //设置电平
+    config.io.start_tone = Buzzer_StartTone; //开始
+    config.io.stop_tone = Buzzer_StopTone;   //停止
     config.io.context = &buzzer_bsp;
     config.active_level = 1U;
     config.default_duty_percent = 50U;
@@ -126,6 +138,11 @@ void BSP_Buzzer_Init(void)
     (void)Buzzer_Init(&g_buzzer, &config);
 }
 
+/*
+* @brief  蜂鸣器定时器更新回调函数
+* @param  timer: 定时器句柄
+* @retval None
+*/
 void BSP_Buzzer_TimerUpdate(TIM_HandleTypeDef *timer)
 {
     uint32_t next_ticks;

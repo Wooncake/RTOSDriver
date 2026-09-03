@@ -17,21 +17,20 @@ void App_Test(void)
     if (events & BUTTON_EVENT_CLICK)
     {
         LED_Toggle(&g_led1);
-        (void)Buzzer_Start(&g_buzzer, 2000U, 80U, HAL_GetTick());
+        (void)Buzzer_PlaySound(&g_buzzer, BUZZER_SOUND_SHORT, HAL_GetTick());
     }
 
     if (events & BUTTON_EVENT_DOUBLE)
     {
         LED_Toggle(&g_led2);
-        (void)Buzzer_Start(&g_buzzer, 1800U, 500U, HAL_GetTick());
+        (void)Buzzer_PlaySound(&g_buzzer, BUZZER_SOUND_CONFIRM, HAL_GetTick());
     }
 
     if (events & BUTTON_EVENT_LONG_START)
     {
         LED_Toggle(&g_led3);
-        (void)Buzzer_Start(&g_buzzer, 1600U, 1000U, HAL_GetTick());
+        (void)Buzzer_PlaySound(&g_buzzer, BUZZER_SOUND_ALARM, HAL_GetTick());
     }
-    
 }
 
 

@@ -23,6 +23,19 @@ typedef enum
 
 } buzzer_status_t;
 
+typedef enum
+{
+    BUZZER_SOUND_SHORT = 0,
+    BUZZER_SOUND_CONFIRM,
+    BUZZER_SOUND_ALARM
+} buzzer_sound_t;
+
+typedef struct
+{
+    uint32_t frequency_hz;
+    uint32_t duration_ms;
+} buzzer_segment_t;
+
 typedef void (*buzzer_set_level_fn)(void *context, uint8_t level);
 
 typedef buzzer_status_t (*buzzer_start_tone_fn)(void *context, uint32_t frequency_hz, uint8_t duty_percent);
@@ -82,6 +95,10 @@ typedef struct
     uint32_t duration_ms;
     uint32_t frequency_hz;
 
+    const buzzer_segment_t *pattern;
+    uint8_t pattern_length;
+    uint8_t pattern_index;
+
     uint8_t initialized;
 
 
@@ -90,6 +107,8 @@ typedef struct
 buzzer_status_t Buzzer_Init(buzzer_handle_t *handle, const buzzer_config_t *config);
 
 buzzer_status_t Buzzer_Start(buzzer_handle_t *handle, uint32_t frequency_hz, uint32_t duration_ms, uint32_t now_ms);
+
+buzzer_status_t Buzzer_PlaySound(buzzer_handle_t *handle, buzzer_sound_t sound, uint32_t now_ms);
 
 buzzer_status_t Buzzer_Stop(buzzer_handle_t *handle);
 
