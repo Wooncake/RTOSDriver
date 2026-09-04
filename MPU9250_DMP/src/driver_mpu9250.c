@@ -5044,6 +5044,8 @@ uint8_t mpu9250_mag_deinit(mpu9250_handle_t *handle)
  *             - 2 handle is NULL
  *             - 3 handle is not initialized
  *             - 4 mag is not inited
+ *             - 5 data is not ready
+ *             - 6 magnetic sensor overflow
  * @note       none
  */
 uint8_t mpu9250_mag_read(mpu9250_handle_t *handle, int16_t mag_raw[3], float mag_ut[3])
@@ -5075,6 +5077,14 @@ uint8_t mpu9250_mag_read(mpu9250_handle_t *handle, int16_t mag_raw[3], float mag
         handle->debug_print("mpu9250: mag read failed.\n");                       /* mag read failed */
        
         return 1;                                                                 /* return error */
+    }
+    if ((buf[0] & 0x01U) == 0U)                                                   /* check data ready */
+    {
+        return 5;
+    }
+    if ((buf[7] & 0x08U) != 0U)                                                   /* check magnetic overflow */
+    {
+        return 6;
     }
     mag_raw[0] = (int16_t)((uint16_t)buf[2] << 8) | buf[1];                       /* set raw mag x */
     mag_raw[1] = (int16_t)((uint16_t)buf[4] << 8) | buf[3];                       /* set raw mag y */

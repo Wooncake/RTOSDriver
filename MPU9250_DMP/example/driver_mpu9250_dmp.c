@@ -615,6 +615,35 @@ uint8_t mpu9250_dmp_init(mpu9250_interface_t interface, mpu9250_address_t addr_p
        
         return 1;
     }
+
+    /* Initialize AK8963 through the MPU9250 bypass path. */
+    res = mpu9250_mag_init(&gs_handle);
+    if (res != 0)
+    {
+        mpu9250_interface_debug_print("mpu9250: mag init failed, code %u.\n", (unsigned int)res);
+        (void)mpu9250_deinit(&gs_handle);
+
+        return 1;
+    }
+    res = mpu9250_mag_set_bits(&gs_handle, MPU9250_DMP_DEFAULT_MAGNETOMETER_BITS);
+    if (res != 0)
+    {
+        mpu9250_interface_debug_print("mpu9250: mag set bits failed.\n");
+        (void)mpu9250_mag_deinit(&gs_handle);
+        (void)mpu9250_deinit(&gs_handle);
+
+        return 1;
+    }
+    res = mpu9250_mag_set_mode(&gs_handle, MPU9250_DMP_DEFAULT_MAGNETOMETER_MODE);
+    if (res != 0)
+    {
+        mpu9250_interface_debug_print("mpu9250: mag set mode failed.\n");
+        (void)mpu9250_mag_deinit(&gs_handle);
+        (void)mpu9250_deinit(&gs_handle);
+
+        return 1;
+    }
+    mpu9250_interface_debug_print("mpu9250: mag init succeeded.\n");
     
     /* set the default gyro standby */
     res = mpu9250_set_gyro_standby(&gs_handle, MPU9250_DMP_DEFAULT_GYROSCOPE_STANDBY);
@@ -1017,6 +1046,13 @@ uint8_t mpu9250_dmp_read_all(int16_t (*accel_raw)[3], float (*accel_g)[3],
     return res;
 }
 
+uint8_t mpu9250_dmp_read_magnetometer(float mag_ut[3])
+{
+    int16_t mag_raw[3];
+
+    return mpu9250_mag_read(&gs_handle, mag_raw, mag_ut);
+}
+
 /**
  * @brief  dmp example deinit
  * @return status code
@@ -1026,11 +1062,18 @@ uint8_t mpu9250_dmp_read_all(int16_t (*accel_raw)[3], float (*accel_g)[3],
  */
 uint8_t mpu9250_dmp_deinit(void)
 {
+    uint8_t res = 0U;
+
+    if (mpu9250_mag_deinit(&gs_handle) != 0)
+    {
+        res = 1U;
+    }
+
     /* deinit */
     if (mpu9250_deinit(&gs_handle) != 0)
     {
-        return 1;
+        res = 1U;
     }
-    
-    return 0;
+
+    return res;
 }

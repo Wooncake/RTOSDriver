@@ -3478,6 +3478,8 @@ uint8_t mpu9250_mag_deinit(mpu9250_handle_t *handle);
  *             - 2 handle is NULL
  *             - 3 handle is not initialized
  *             - 4 mag is not inited
+ *             - 5 data is not ready
+ *             - 6 magnetic sensor overflow
  * @note       none
  */
 uint8_t mpu9250_mag_read(mpu9250_handle_t *handle, int16_t mag_raw[3], float mag_ut[3]);

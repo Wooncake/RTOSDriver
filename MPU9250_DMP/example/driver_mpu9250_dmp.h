@@ -71,7 +71,7 @@ extern "C"{
 #define MPU9250_DMP_DEFAULT_FSYNC_INTERRUPT                MPU9250_BOOL_FALSE                        /**< disable fsync interrupt */
 #define MPU9250_DMP_DEFAULT_FSYNC_INTERRUPT_LEVEL          MPU9250_PIN_LEVEL_LOW                     /**< low level */
 #define MPU9250_DMP_DEFAULT_IIC_MASTER                     MPU9250_BOOL_FALSE                        /**< disable iic master */
-#define MPU9250_DMP_DEFAULT_IIC_BYPASS                     MPU9250_BOOL_FALSE                        /**< disable iic bypass */
+#define MPU9250_DMP_DEFAULT_IIC_BYPASS                     MPU9250_BOOL_TRUE                         /**< enable AK8963 bypass */
 #define MPU9250_DMP_DEFAULT_PEOMETER_WALK_TIME             200                                       /**< 200ms */
 #define MPU9250_DMP_DEFAULT_PEOMETER_STEP_COUNT            0                                         /**< 0 */
 #define MPU9250_DMP_DEFAULT_SHAKE_REJECT_TIMEOUT           10                                        /**< 10ms */
@@ -99,6 +99,18 @@ extern "C"{
 #define MPU9250_DMP_DEFAULT_IIC_WAIT_FOR_EXTERNAL_SENSOR   MPU9250_BOOL_FALSE                        /**< disable wait for external sensor */
 #define MPU9250_DMP_DEFAULT_IIC_READ_MODE                  MPU9250_IIC_READ_MODE_RESTART             /**< restart mode */
 #define MPU9250_DMP_DEFAULT_IIC_DELAY                      MPU9250_BOOL_FALSE                        /**< disable iic delay */
+
+/* AK8963 calibration and yaw fusion parameters. Bias is in uT. */
+#define MPU9250_DMP_MAG_BIAS_X_UT                          0.0f
+#define MPU9250_DMP_MAG_BIAS_Y_UT                          0.0f
+#define MPU9250_DMP_MAG_BIAS_Z_UT                          0.0f
+#define MPU9250_DMP_MAG_SCALE_X                            1.0f
+#define MPU9250_DMP_MAG_SCALE_Y                            1.0f
+#define MPU9250_DMP_MAG_SCALE_Z                            1.0f
+#define MPU9250_DMP_MAG_DECLINATION_DEG                    0.0f
+#define MPU9250_DMP_MAG_YAW_CORRECTION_GAIN                0.05f
+#define MPU9250_DMP_MAG_FIELD_MIN_UT                       10.0f
+#define MPU9250_DMP_MAG_FIELD_MAX_UT                       100.0f
 
 /**
  * @brief  dmp irq
@@ -158,6 +170,17 @@ uint8_t mpu9250_dmp_read_all(int16_t (*accel_raw)[3], float (*accel_g)[3],
                              float *pitch, float *roll, float *yaw,
                              uint16_t *l
                             );
+
+/**
+ * @brief      read the AK8963 magnetometer while DMP is running
+ * @param[out] *mag_ut pointer to the converted magnetic field buffer
+ * @return     status code
+ *             - 0 success
+ *             - 1 read failed
+ *             - 5 data is not ready
+ *             - 6 magnetic sensor overflow
+ */
+uint8_t mpu9250_dmp_read_magnetometer(float mag_ut[3]);
 
 /**
  * @brief      dmp example get pedometer counter
