@@ -54,6 +54,9 @@ extern "C"{
 #define MPU9250_DMP_DEFAULT_CLOCK_SOURCE                   MPU9250_CLOCK_SOURCE_PLL                  /**< pll */
 #define MPU9250_DMP_DEFAULT_RATE                           50                                        /**< 50Hz */
 #define MPU9250_DMP_ENABLE_STARTUP_SELF_TEST               0                                         /**< disable factory self test */
+#define MPU9250_DMP_INIT_RETRY_COUNT                       10U                                        /**< retry DMP/gyro init up to configured count */
+#define MPU9250_DMP_INIT_RETRY_DELAY_MS                    300U                                      /**< delay between init attempts */
+#define MPU9250_DMP_STARTUP_SETTLE_MS                     2000U                                     /**< allow gyro calibration to settle */
 #define MPU9250_DMP_DEFAULT_ACCELEROMETER_RANGE            MPU9250_ACCELEROMETER_RANGE_2G            /**< 2g */
 #define MPU9250_DMP_DEFAULT_GYROSCOPE_RANGE                MPU9250_GYROSCOPE_RANGE_2000DPS           /**< 2000dps */
 #define MPU9250_DMP_DEFAULT_LOW_PASS_FILTER                MPU9250_LOW_PASS_FILTER_3                 /**< low pass filter 3 */
@@ -109,6 +112,7 @@ extern "C"{
 #define MPU9250_DMP_MAG_SCALE_Z                            1.0f
 #define MPU9250_DMP_MAG_DECLINATION_DEG                    0.0f
 #define MPU9250_DMP_MAG_YAW_CORRECTION_GAIN                0.05f
+#define MPU9250_DMP_YAW_FILTER_ALPHA                       0.20f
 #define MPU9250_DMP_MAG_FIELD_MIN_UT                       10.0f
 #define MPU9250_DMP_MAG_FIELD_MAX_UT                       100.0f
 

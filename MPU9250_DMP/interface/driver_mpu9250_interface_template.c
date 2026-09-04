@@ -42,8 +42,8 @@
 #include <stdarg.h>
 #include "FreeRTOS.h"
 #include "task.h"
-/*PB6 SCL
-	PB7 SDA
+/*PB8 SCL
+	PB9 SDA
 */
 
 /**
@@ -66,6 +66,12 @@ uint8_t mpu9250_interface_iic_init(void)
    {
        mpu9250_interface_debug_print("mpu9250 iic: bus not idle after init, scl=%u sda=%u.\n",
                                      (unsigned int)scl, (unsigned int)sda);
+   }
+
+   if (res != 0U)
+   {
+       /* Ensure the next init retry starts with reset GPIO configuration. */
+       (void)iic_deinit();
    }
 
    return res;

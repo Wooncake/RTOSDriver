@@ -53,7 +53,7 @@
  * @brief  iic bus init
  * @return status code
  *         - 0 success
- * @note   SCL is PB6 and SDA is PB7
+ * @note   SCL is PB8 and SDA is PB9
  */
 uint8_t iic_init(void);
 

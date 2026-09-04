@@ -14,72 +14,112 @@
 #define PBout(n)          BIT_ADDR(GPIOB_ODR_Addr, n)
 #define PBin(n)           BIT_ADDR(GPIOB_IDR_Addr, n)
 
-// PB7 是 SDA，位于 CRL 的 bit28~bit31。
-// 该板未提供足够的外部上拉，发送时沿用 LibDriver 的推挽输出。
+// PB8 是 SCL，PB9 是 SDA，均位于 CRH。
+// 板上已有外部上拉，因此使用开漏输出，符合 I2C 电气规范。
 // 读 ACK 和数据时切换为上拉输入，让 MPU9250 驱动 SDA。
 // SDA_IN()：上拉输入 CNF=10 MODE=00 -> 0x8。
-// SDA_OUT()：推挽输出 CNF=00 MODE=11 -> 0x3。
-#define SDA_IN()   do { GPIOB->CRL = (GPIOB->CRL & ~(0xFU << 28)) | (0x8U << 28); } while (0)
-#define SDA_OUT()  do { GPIOB->CRL = (GPIOB->CRL & ~(0xFU << 28)) | (0x3U << 28); } while (0)
+// SDA_OUT()：开漏输出 CNF=01 MODE=11 -> 0x7。
+#define SDA_IN()   do { GPIOB->CRH = (GPIOB->CRH & ~(0xFU << 4)) | (0x8U << 4); } while (0)
+#define SDA_OUT()  do { GPIOB->CRH = (GPIOB->CRH & ~(0xFU << 4)) | (0x7U << 4); } while (0)
 
-#define IIC_SCL           PBout(6)
-#define IIC_SDA           PBout(7)
-#define READ_SCL          PBin(6)
-#define READ_SDA          PBin(7)
+#define IIC_SCL           PBout(8)
+#define IIC_SDA           PBout(9)
+#define READ_SCL          PBin(8)
+#define READ_SDA          PBin(9)
 
 
 /**
  * @brief  iic bus init
  * @return status code
  *         - 0 success
- * @note   SCL is PB6 and SDA is PB7
+ * @note   SCL is PB8 and SDA is PB9
  */
 uint8_t iic_init(void)
 {
-    uint8_t i;
+    uint8_t round;
+    uint8_t pulse;
     GPIO_InitTypeDef GPIO_Initure;
     
     /* enable iic gpio clock */
     __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    /* A previous failed attempt may have left PB8/PB9 in a different mode. */
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8 | GPIO_PIN_9);
+    delay_us(10);
     
     /* Release SDA first so a reset in the middle of a transfer can be recovered. */
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6 | GPIO_PIN_7, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8 | GPIO_PIN_9, GPIO_PIN_SET);
 
-    GPIO_Initure.Pin = GPIO_PIN_6;
-    GPIO_Initure.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_Initure.Pin = GPIO_PIN_8;
+    GPIO_Initure.Mode = GPIO_MODE_OUTPUT_OD;
     GPIO_Initure.Pull = GPIO_PULLUP;
     GPIO_Initure.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &GPIO_Initure);
 
     IIC_SCL = 1;
 
-    GPIO_Initure.Pin = GPIO_PIN_7;
+    GPIO_Initure.Pin = GPIO_PIN_9;
     GPIO_Initure.Mode = GPIO_MODE_INPUT;
     GPIO_Initure.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(GPIOB, &GPIO_Initure);
     IIC_SDA = 1;
     delay_us(20);
 
-    /* Clock out a transfer left unfinished by an MCU reset. */
-    for (i = 0; (i < 9U) && (READ_SDA == 0U); i++)
+    /* Recover a transfer left unfinished by an MCU reset. A slave may keep
+       SDA low until it sees clocks followed by a complete STOP condition. */
+    for (round = 0U; round < 3U; round++)
     {
-        IIC_SCL = 0;
+        SDA_IN();
+        IIC_SDA = 1;
+        IIC_SCL = 1;
+        delay_us(20);
+
+        if ((READ_SCL != 0U) && (READ_SDA != 0U))
+        {
+            break;
+        }
+
+        for (pulse = 0U; pulse < 9U; pulse++)
+        {
+            IIC_SCL = 0;
+            delay_us(20);
+            IIC_SCL = 1;
+            delay_us(20);
+            if (READ_SCL == 0U)
+            {
+                break;
+            }
+        }
+
+        /* Force STOP even when SDA was still low during recovery. */
+        SDA_OUT();
+        IIC_SDA = 0;
         delay_us(20);
         IIC_SCL = 1;
         delay_us(20);
+        IIC_SDA = 1;
+        delay_us(50);
+
+        SDA_IN();
+        IIC_SDA = 1;
+        delay_us(20);
+        if ((READ_SCL != 0U) && (READ_SDA != 0U))
+        {
+            break;
+        }
+        delay_us(100);
     }
 
     if ((READ_SCL == 0U) || (READ_SDA == 0U))
     {
+        /* Leave the pins in a neutral state before the caller retries. */
+        HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8 | GPIO_PIN_9);
         return 1;
     }
 
-    /* Generate STOP, then enter the same push-pull idle mode as LibDriver. */
+    /* Keep the same push-pull idle mode as the existing bit-bang driver. */
     SDA_OUT();
-    IIC_SDA = 0;
-    delay_us(20);
     IIC_SCL = 1;
-    delay_us(20);
     IIC_SDA = 1;
     delay_us(20);
     
@@ -95,7 +135,7 @@ uint8_t iic_init(void)
 uint8_t iic_deinit(void)
 {
     /* iic gpio deinit */
-    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6 | GPIO_PIN_7);
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8 | GPIO_PIN_9);
     
     return 0;
 }
